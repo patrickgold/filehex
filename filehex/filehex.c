@@ -3,7 +3,7 @@
 * Source file for simple tool called 'filehex'.
 *
 * Licensed under the MIT license. See LICENSE file for more information.
-* version: v.0.1.2.alpha
+* version: v.0.1.3.alpha
 */
 
 #if defined(_WIN32) || defined(_WIN64)
@@ -18,12 +18,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 
 struct filehex {
     char *filePath;
     unsigned bytesPerLine;
     unsigned long maxReadBytes;
     unsigned bool_showOffset;
+    unsigned bool_editMode;
 };
 
 int process_option(struct filehex *, char *, char *);
@@ -33,7 +35,7 @@ int main(int argc, char **argv) {
     int i, ret_code;
     char *key, *value;
     struct filehex filehex_options = {
-        NULL, 16, 0, 1
+        NULL, 16, 0, 1, 0
     };
 
     if (argc < 2) {
@@ -74,7 +76,7 @@ int main(int argc, char **argv) {
 int process_option(struct filehex *filehexopts, char *key, char *value) {
     long int tmp;
     if (strcmp(key, "?") == 0) {
-        printf("filehex v.0.1.2.alpha\n");
+        printf("filehex v.0.1.3.alpha\n");
         printf("(c) 2018 Patrick Goldinger. All rights reserved.\n\n");
         printf("usage: filehex [options] <filePath>\n");
         printf("e.g. : filehex -n=512 /home/user/test.txt\n\n");
@@ -107,23 +109,28 @@ int process_option(struct filehex *filehexopts, char *key, char *value) {
         }
         filehexopts->bytesPerLine = tmp;
     }
+    else if (strcmp(key, "e") == 0) {
+        filehexopts->bool_editMode = 1;
+    }
     return 0;
 }
 
 
-/// <summary>Outputs a file in hexadecimal reprentation.
+/// <summary>Outputs a file in hexadecimal representation.
 /// Use filehex struct to set options on behaviour and layout.
 /// Returns 0 if success, -1 when buffer allocating fails or
 /// a value greater 0 (errno) when fopen is NULL.</summary>
 /// <param name='filehexopts'>Preferences struct.</param>
 int file_output_hex(struct filehex *filehexopts) {
 
+    if (filehexopts->bool_editMode == 1)
+        puts("Edit mode currently not supported!");
+
     // define variables used.
     unsigned 
         n, m, // counter vars
+        offset = 0, // sum of bytes read
         eof_reached = 0; // bool-like int for while loop
-    unsigned long long 
-        offset = 0; // sum of bytes read
     size_t 
         bytes_read = 0, // holds the bytes read of fread()
         bytesToRead = 0; // holds how many bytes have to be read
