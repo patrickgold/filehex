@@ -1,6 +1,5 @@
 # filehex
 A simple tool which outputs a file byte by byte in hexadecimal representation. You can customize output by providing command line parameters.
-Filehex will get an edit mode in the near future.
 
 ## Build and run this project
 
